@@ -1,0 +1,19 @@
+name: ghcjs-hello2
+version: 0.0.1
+cabal-version: >=1.8
+build-type: Simple
+license: BSD3
+license-file: ""
+description:
+data-dir: ""
+
+executable ghcjs-hello2
+    build-depends: base -any, blaze-html -any, filepath -any,
+                   hamlet -any, text -any, blaze-markup -any, ghcjs -any,
+                   webkit >=0.12.5, ghcjs-dom -any, mtl -any, sodium -any,
+                   webkit-sodium -any, 
+                   webkit-javascriptcore -any
+    main-is: Main.hs
+    buildable: True
+    hs-source-dirs: src
+
