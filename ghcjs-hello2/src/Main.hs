@@ -84,83 +84,22 @@ shiftClickAction webview = do
   putStrLn "key pressed"
   webframe <- webViewGetMainFrame webview 
   gctxt <- webFrameGetGlobalContext webframe 
-  str <- jsstringcreatewithutf8cstring " { name : 'ian' } " 
-  result <- jsevaluatescript gctxt nullPtr nullPtr nullPtr 1 nullPtr
-  b <- jsvalueisundefined gctxt result
-  putStrLn $ show b 
+  str1 <- jsstringcreatewithutf8cstring " 3 + 4 + 5 " 
+  str2 <- jsstringcreatewithutf8cstring " 3 + 4 + 6 "
+  b1 <- jsstringisequal str1 str2   
+  result <- jsevaluatescript gctxt str1 nullPtr nullPtr 1 nullPtr
+  b2 <- jsvalueisundefined gctxt result
+  b3 <- jsvalueisnumber gctxt result 
+  b4 <- jsvalueisstring gctxt result 
+  b5 <- jsvalueisobject gctxt result 
+  typ <- jsvaluegettype gctxt result 
+  num <- jsvaluetonumber gctxt result nullPtr 
+  -- l <- jsstringgetlength str 
+
+  putStrLn $ show (b1,b2,b3,b4,b5)
+  print $ typ 
+  print $ num 
   putStrLn "done"
-   {-
-    -- We can get the elements by ID
-    Just numInput <- fmap castToHTMLInputElement <$> documentGetElementById doc "num"
-    Just prime    <- fmap castToHTMLDivElement   <$> documentGetElementById doc "prime"
-    mbTerminal    <- fmap castToHTMLDivElement   <$> documentGetElementById doc "terminal"
-
-    -- Set the input focus
-    elementFocus numInput
-
-    -- If we are in the browser let's shrink the terminal window to make room
-    case mbTerminal of
-      Just terminal -> do
-        Just style <- elementGetStyle terminal
-        cssStyleDeclarationSetProperty style "height" "200" ""
-      _             -> return ()
-
-    -- We don't want to work on more than on prime number test at a time.
-    -- So we will have a single worker thread and a queue with just one value.
-    next <- newEmptyMVar
-    forkIO . forever $ do
-      n <- takeMVar next
-      htmlElementSetInnerHTML prime . unpack $ validatePrime n
-
-    -- Something to set the next work item
-    let setNext = do
-                    n <- htmlInputElementGetValue numInput
-                    tryTakeMVar next -- Discard existing next item
-                    putMVar next n
-
-    -- Lets wire up some events
-    elementOnkeydown  numInput (liftIO setNext)
-    elementOnkeyup    numInput (liftIO setNext)
-    elementOnkeypress numInput (liftIO setNext)
-
-    -- What is this?
-    elementOnclick heading $ do
-      shiftIsPressed <- mouseShiftKey
-      when shiftIsPressed . liftIO $ lazyLoad_freecell doc body
-    -}
 
 
 
-{-
--- Integer uses goog.math.Integer compiled to Javascript
-isPrime :: Integer -> Bool
-isPrime p = p > 1 && (all (\n -> p `mod` n /= 0)
-                     $ takeWhile (\n -> n*n <= p) [2..])
-
-validatePrimeMessage :: Integer -> Html
-validatePrimeMessage p | isPrime p = [shamlet|$newline always
-                                        <b>Yes</b>, #{p} is a prime|]
-                       | otherwise = [shamlet|$newline always
-                                        <b>No</b>, #{p} is not a prime|]
-
-validatePrime :: String -> Text
-validatePrime s = renderHtml $
-  case reads s of
-    [(n, "")] -> validatePrimeMessage n
-    _         -> [shamlet|$newline always
-                    <b>No</b>, that is not a number|]
-
--- Sometimes you might have something that needs more JavaScript than everything else
--- you can tell the GHCJS linker to put its dependancies in a sparate file using
--- a lazyLoad_ prefix
-{-# NOINLINE lazyLoad_freecell #-}
-lazyLoad_freecell doc body = do
-    htmlElementSetInnerHTML body $
-      "<div style=\"position:relative;left:0px;top:0px;background-color:#e0d0ff;width:700px;height:500px\" "++
-      "id=\"freecell\" draggable=\"false\"></div>"
-    Just div <- fmap castToHTMLElement <$> documentGetElementById doc "freecell"
-    unlisten <- engine doc div =<< mkFreecell
-    -- Prevent finalizers running too soon
-    forkIO $ forever (threadDelay 1000000000) >> unlisten
-    return ()
--}
